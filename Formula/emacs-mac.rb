@@ -96,6 +96,16 @@ class EmacsMac < Formula
     sha256 "5a13e83e79ce9c4a970ff0273e9a3a07403cc07f7333a0022b91c191200155a1"
   end
 
+  # patch for vertically center the line when setting the line-spacing variable
+  # This patch was created by sollidsnake.
+  # https://lists.gnu.org/archive/html/emacs-devel/2019-08/msg00659.html
+  # https://github.com/sollidsnake/emacs/commit/aff5c59d10001e1161884ef3d0725eda86fa3ea0
+  # https://www.reddit.com/r/emacs/comments/cxywtc/i_wrote_a_patch_to_vertically_center_the_line/
+  patch do
+    url "https://raw.githubusercontent.com/kuranari/homebrew-emacsmacport/c50207d557ffd88bcde725ac68d25c0917d91134/patches/option-to-center-lines-vertically-when-using-line-sp.patch"
+    sha256 "a1138760c08fd9f65ab96e7af697661e6f64994988d9d0f30028c466faec880a"
+  end
+
   def install
     args = [
       "--enable-locallisppath=#{HOMEBREW_PREFIX}/share/emacs/site-lisp",
