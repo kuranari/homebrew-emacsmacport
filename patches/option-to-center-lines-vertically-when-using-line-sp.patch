@@ -1,0 +1,100 @@
+From aff5c59d10001e1161884ef3d0725eda86fa3ea0 Mon Sep 17 00:00:00 2001
+From: Jesse Nazario <jessenzr@gmail.com>
+Date: Sat, 31 Aug 2019 15:35:34 -0300
+Subject: [PATCH] Option to center lines vertically when using line-spacing
+
+---
+ src/buffer.c | 13 +++++++++++++
+ src/buffer.h |  4 ++++
+ src/xdisp.c  |  8 +++++++-
+ 3 files changed, 24 insertions(+), 1 deletion(-)
+
+diff --git a/src/buffer.c b/src/buffer.c
+index 62a3d66c8b..1b9f96d61b 100644
+--- a/src/buffer.c
++++ b/src/buffer.c
+@@ -219,6 +219,11 @@ bset_extra_line_spacing (struct buffer *b, Lisp_Object val)
+   b->extra_line_spacing_ = val;
+ }
+ static void
++bset_line_spacing_vertical_center (struct buffer *b, Lisp_Object val)
++{
++  b->line_spacing_vertical_center_ = val;
++}
++static void
+ bset_file_format (struct buffer *b, Lisp_Object val)
+ {
+   b->file_format_ = val;
+@@ -956,6 +961,7 @@ reset_buffer (register struct buffer *b)
+     (b, BVAR (&buffer_defaults, enable_multibyte_characters));
+   bset_cursor_type (b, BVAR (&buffer_defaults, cursor_type));
+   bset_extra_line_spacing (b, BVAR (&buffer_defaults, extra_line_spacing));
++  bset_line_spacing_vertical_center (b, BVAR (&buffer_defaults, line_spacing_vertical_center));
+ 
+   b->display_error_modiff = 0;
+ }
+@@ -5190,6 +5196,7 @@ init_buffer_once (void)
+   XSETFASTINT (BVAR (&buffer_local_flags, header_line_format), idx); ++idx;
+   XSETFASTINT (BVAR (&buffer_local_flags, cursor_type), idx); ++idx;
+   XSETFASTINT (BVAR (&buffer_local_flags, extra_line_spacing), idx); ++idx;
++  XSETFASTINT (BVAR (&buffer_local_flags, line_spacing_vertical_center), idx); ++idx;
+   XSETFASTINT (BVAR (&buffer_local_flags, cursor_in_non_selected_windows), idx); ++idx;
+ 
+   /* buffer_local_flags contains no pointers, so it's safe to treat it
+@@ -5259,6 +5266,7 @@ init_buffer_once (void)
+   bset_bidi_paragraph_separate_re (&buffer_defaults, Qnil);
+   bset_cursor_type (&buffer_defaults, Qt);
+   bset_extra_line_spacing (&buffer_defaults, Qnil);
++  bset_line_spacing_vertical_center (&buffer_defaults, Qnil);
+   bset_cursor_in_non_selected_windows (&buffer_defaults, Qt);
+ 
+   bset_enable_multibyte_characters (&buffer_defaults, Qt);
+@@ -6248,6 +6256,11 @@ from (abs POSITION).  If POSITION is positive, point was at the front
+ If value is a floating point number, it specifies the spacing relative
+ to the default frame line height.  A value of nil means add no extra space.  */);
+ 
++  DEFVAR_PER_BUFFER ("line-spacing-vertical-center",
++		     &BVAR (current_buffer, line_spacing_vertical_center), Qnil,
++                     doc: /* Non-nil will center the line content vertically
++when using `line-spacing' variable.  */);
++
+   DEFVAR_PER_BUFFER ("cursor-in-non-selected-windows",
+ 		     &BVAR (current_buffer, cursor_in_non_selected_windows), Qnil,
+ 		     doc: /* Non-nil means show a cursor in non-selected windows.
+diff --git a/src/buffer.h b/src/buffer.h
+index 2080a6f40b..48cf06d06f 100644
+--- a/src/buffer.h
++++ b/src/buffer.h
+@@ -740,6 +740,10 @@ #define BVAR(buf, field) ((buf)->field ## _)
+      in the display of this buffer.  */
+   Lisp_Object extra_line_spacing_;
+ 
++  /* When non-nil will center the line content vertically. To be used
++     along with `line-spacing'.  */
++  Lisp_Object line_spacing_vertical_center_;
++
+   /* Cursor type to display in non-selected windows.
+      t means to use hollow box cursor.
+      See `cursor-type' for other values.  */
+diff --git a/src/xdisp.c b/src/xdisp.c
+index 75bc536cb9..0ddabe6e09 100644
+--- a/src/xdisp.c
++++ b/src/xdisp.c
+@@ -29294,7 +29294,13 @@ gui_produce_glyphs (struct it *it)
+ 
+   if (extra_line_spacing > 0)
+     {
+-      it->descent += extra_line_spacing;
++      if (! BVAR (XBUFFER (it->w->contents), line_spacing_vertical_center)) {
++        it->descent += extra_line_spacing;
++      } else {
++        int spacing = extra_line_spacing / 2;
++        it->ascent += spacing;
++        it->descent += spacing;
++      }
+       if (extra_line_spacing > it->max_extra_line_spacing)
+ 	it->max_extra_line_spacing = extra_line_spacing;
+     }
+-- 
+2.39.0
+
