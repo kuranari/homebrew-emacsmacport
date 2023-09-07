@@ -80,6 +80,16 @@ class EmacsMacAT28 < Formula
     sha256 "b0e26dd07d089786a59faebe138820f01ff0365fb9c9597b47c7b07c451fea56"
   end
 
+  # patch for vertically center the line when setting the line-spacing variable
+  # This patch was created by sollidsnake.
+  # https://lists.gnu.org/archive/html/emacs-devel/2019-08/msg00659.html
+  # https://github.com/sollidsnake/emacs/commit/aff5c59d10001e1161884ef3d0725eda86fa3ea0
+  # https://www.reddit.com/r/emacs/comments/cxywtc/i_wrote_a_patch_to_vertically_center_the_line/
+  patch do
+    url "https://raw.githubusercontent.com/kuranari/homebrew-emacsmacport/2916e8049a88c249ed0cc13882e82cd2917f44d2/patches/emacs-28-vertically-center-line.patch"
+    sha256 "a1138760c08fd9f65ab96e7af697661e6f64994988d9d0f30028c466faec880a"
+  end
+
   if build.with? "no-title-bars"
     # odie "--with-no-title-bars patch not supported on --HEAD" if build.head?
     patch do

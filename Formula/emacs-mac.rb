@@ -87,8 +87,8 @@ class EmacsMac < Formula
   # https://github.com/sollidsnake/emacs/commit/aff5c59d10001e1161884ef3d0725eda86fa3ea0
   # https://www.reddit.com/r/emacs/comments/cxywtc/i_wrote_a_patch_to_vertically_center_the_line/
   patch do
-    url "https://raw.githubusercontent.com/kuranari/homebrew-emacsmacport/c50207d557ffd88bcde725ac68d25c0917d91134/patches/option-to-center-lines-vertically-when-using-line-sp.patch"
-    sha256 "a1138760c08fd9f65ab96e7af697661e6f64994988d9d0f30028c466faec880a"
+    url "https://raw.githubusercontent.com/kuranari/homebrew-emacsmacport/2916e8049a88c249ed0cc13882e82cd2917f44d2/patches/emacs-29-vertically-center-line.patch"
+    sha256 "58dc066e049d013283f8b2e959a9f6c0336cddd9ba3fdc98f2df2babf6dfada5"
   end
 
   if build.with? "no-title-bars"
