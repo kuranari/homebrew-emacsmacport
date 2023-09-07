@@ -1,0 +1,87 @@
+diff --git a/src/buffer.c b/src/buffer.c
+index 9facc4b7ab8..736304d0448 100644
+--- a/src/buffer.c
++++ b/src/buffer.c
+@@ -239,6 +239,11 @@ bset_extra_line_spacing (struct buffer *b, Lisp_Object val)
+ {
+   b->extra_line_spacing_ = val;
+ }
++static void
++bset_line_spacing_vertical_center (struct buffer *b, Lisp_Object val)
++{
++  b->line_spacing_vertical_center_ = val;
++}
+ #ifdef HAVE_TREE_SITTER
+ static void
+ bset_ts_parser_list (struct buffer *b, Lisp_Object val)
+@@ -1072,6 +1077,7 @@ reset_buffer (register struct buffer *b)
+     (b, BVAR (&buffer_defaults, enable_multibyte_characters));
+   bset_cursor_type (b, BVAR (&buffer_defaults, cursor_type));
+   bset_extra_line_spacing (b, BVAR (&buffer_defaults, extra_line_spacing));
++  bset_line_spacing_vertical_center (b, BVAR (&buffer_defaults, line_spacing_vertical_center));
+ #ifdef HAVE_TREE_SITTER
+   bset_ts_parser_list (b, Qnil);
+ #endif
+@@ -4716,6 +4722,7 @@ init_buffer_once (void)
+   XSETFASTINT (BVAR (&buffer_local_flags, tab_line_format), idx); ++idx;
+   XSETFASTINT (BVAR (&buffer_local_flags, cursor_type), idx); ++idx;
+   XSETFASTINT (BVAR (&buffer_local_flags, extra_line_spacing), idx); ++idx;
++  XSETFASTINT (BVAR (&buffer_local_flags, line_spacing_vertical_center), idx); ++idx;
+ #ifdef HAVE_TREE_SITTER
+   XSETFASTINT (BVAR (&buffer_local_flags, ts_parser_list), idx); ++idx;
+ #endif
+@@ -4788,6 +4795,8 @@ init_buffer_once (void)
+   bset_bidi_paragraph_separate_re (&buffer_defaults, Qnil);
+   bset_cursor_type (&buffer_defaults, Qt);
+   bset_extra_line_spacing (&buffer_defaults, Qnil);
++  bset_line_spacing_vertical_center (&buffer_defaults, Qnil);
++
+ #ifdef HAVE_TREE_SITTER
+   bset_ts_parser_list (&buffer_defaults, Qnil);
+ #endif
+@@ -5859,6 +5868,11 @@ from (abs POSITION).  If POSITION is positive, point was at the front
+ If value is a floating point number, it specifies the spacing relative
+ to the default frame line height.  A value of nil means add no extra space.  */);
+ 
++  DEFVAR_PER_BUFFER ("line-spacing-vertical-center",
++		     &BVAR (current_buffer, line_spacing_vertical_center), Qnil,
++                     doc: /* Non-nil will center the line content vertically
++when using `line-spacing' variable.  */);
++
+   DEFVAR_PER_BUFFER ("cursor-in-non-selected-windows",
+ 		     &BVAR (current_buffer, cursor_in_non_selected_windows), Qnil,
+ 		     doc: /* Non-nil means show a cursor in non-selected windows.
+diff --git a/src/buffer.h b/src/buffer.h
+index e71ffe28045..6bf2c9e5337 100644
+--- a/src/buffer.h
++++ b/src/buffer.h
+@@ -562,6 +562,10 @@ #define BVAR(buf, field) ((buf)->field ## _)
+      in the display of this buffer.  */
+   Lisp_Object extra_line_spacing_;
+ 
++  /* When non-nil will center the line content vertically. To be used
++     along with `line-spacing'.  */
++  Lisp_Object line_spacing_vertical_center_;
++
+ #ifdef HAVE_TREE_SITTER
+   /* A list of tree-sitter parsers for this buffer.  */
+   Lisp_Object ts_parser_list_;
+diff --git a/src/xdisp.c b/src/xdisp.c
+index 8970d5aaaf2..3713dd86016 100644
+--- a/src/xdisp.c
++++ b/src/xdisp.c
+@@ -32978,7 +32978,13 @@ gui_produce_glyphs (struct it *it)
+ 
+   if (extra_line_spacing > 0)
+     {
+-      it->descent += extra_line_spacing;
++      if (! BVAR (XBUFFER (it->w->contents), line_spacing_vertical_center)) {
++        it->descent += extra_line_spacing;
++      } else {
++        int spacing = extra_line_spacing / 2;
++        it->ascent += spacing;
++        it->descent += spacing;
++      }
+       if (extra_line_spacing > it->max_extra_line_spacing)
+ 	it->max_extra_line_spacing = extra_line_spacing;
+     }
