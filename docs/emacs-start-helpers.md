@@ -21,7 +21,7 @@ For an already-installed Emacs-mac, place the following code in a script file, r
 
 ```
 #!/bin/bash
-exec #(brew --prefix)/opt/emacs-mac/Emacs.app/Contents/MacOS/Emacs.sh "$@"
+exec $(brew --prefix)/opt/emacs-mac/Emacs.app/Contents/MacOS/Emacs.sh "$@"
 ```
 
 ### Starter script 2
@@ -44,6 +44,9 @@ Cons: Need to repeat the install step for every upgrade and build option change.
 
 #### Installation
 Copy the `Emacs.app` from `$(brew --prefix)/opt/emacs-mac/` to `/Applications` manually or by a shell script.
+```bash
+cp -a $(brew --prefix)/opt/emacs-mac/Emacs.app /Applications
+```
 
 ### Helper 2
 Create a simple app bundle that opens `Emacs.app` under Homebrew directory.
